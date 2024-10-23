@@ -1,85 +1,114 @@
-import Image from "next/image";
-import type { ReactNode } from "react";
+'use client'
+import { type ReactNode } from "react";
+import { useAppSelector } from "@/lib/hooks";
 import { StoreProvider } from "./StoreProvider";
-import { Nav } from "./components/Nav";
+import { GlobalStyle } from "./styles/globals";
+import { ToastContainer } from "react-toastify";
+import { ThemeProvider } from "styled-components";
+import { darkColors, whiteColors } from "@/utils/colors";
+import AuthWatcher from "./components/Watchers/AuthWatcher";
+import { Box, CircularProgress, CssBaseline } from "@mui/material";
+import StyledComponentsRegistry from "@/lib/styledComponents/registry";
+import { createTheme, ThemeProvider as MuiThemeProvider, useColorScheme } from "@mui/material/styles";
 
-import "./styles/globals.css";
-import styles from "./styles/layout.module.css";
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface Props {
   readonly children: ReactNode;
 }
 
-export default function RootLayout({ children }: Props) {
+
+const MainComponent = ({ children }: Props) => {
+
+  const { mode: muiMode, systemMode } = useColorScheme();
+  const { loading } = useAppSelector(state => state.auth);
+
+  const storageMode = typeof localStorage !== "undefined" ? localStorage.getItem("mui-mode") as "light" | "dark" | undefined : null;
+  const mode = storageMode ? storageMode : muiMode == "system" ? (systemMode || "dark") : (muiMode || "dark");
+
+  const colorPallete = {
+    dark: { mode: mode, ...darkColors },
+    light: { mode: mode, ...whiteColors },
+  };
+
   return (
-    <StoreProvider>
-      <html lang="en">
+    <ThemeProvider theme={colorPallete[mode] || colorPallete.dark}>
+      <html lang="pt-BR">
         <body>
-          <section className={styles.container}>
-            <Nav />
-
-            <header className={styles.header}>
-              <Image
-                src="/logo.svg"
-                className={styles.logo}
-                alt="logo"
-                width={100}
-                height={100}
-              />
-            </header>
-
-            <main className={styles.main}>{children}</main>
-
-            <footer className={styles.footer}>
-              <span>Learn </span>
-              <a
-                className={styles.link}
-                href="https://reactjs.org"
-                target="_blank"
-                rel="noopener noreferrer"
+          <ToastContainer />
+          {
+            loading
+              ? <Box
+                width={"100%"}
+                height={"100%"}
+                display={"flex"}
+                alignItems={"center"}
+                justifyContent={"center"}
               >
-                React
-              </a>
-              <span>, </span>
-              <a
-                className={styles.link}
-                href="https://redux.js.org"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Redux
-              </a>
-              <span>, </span>
-              <a
-                className={styles.link}
-                href="https://redux-toolkit.js.org"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Redux Toolkit
-              </a>
-              <span>, </span>
-              <a
-                className={styles.link}
-                href="https://react-redux.js.org"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                React Redux
-              </a>
-              ,<span> and </span>
-              <a
-                className={styles.link}
-                href="https://reselect.js.org"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Reselect
-              </a>
-            </footer>
-          </section>
+                <CircularProgress />
+              </Box>
+              : children
+          }
         </body>
       </html>
-    </StoreProvider>
+      <GlobalStyle />
+    </ThemeProvider>
+  )
+}
+
+const theme = createTheme({
+  colorSchemes: {
+    dark: {
+      palette: {
+        mode: "dark",
+        background: {
+          default: darkColors.body,
+          paper: darkColors.background,
+          defaultChannel: darkColors.body,
+          paperChannel: darkColors.background,
+        },
+        primary: {
+          main: darkColors.primary,
+        },
+        secondary: {
+          main: darkColors.secondary,
+        },
+      }
+    },
+    light: {
+      palette: {
+        mode: "light",
+        background: {
+          default: whiteColors.body,
+          paper: whiteColors.background,
+          defaultChannel: whiteColors.body,
+          paperChannel: whiteColors.background,
+        },
+        primary: {
+          main: whiteColors.primary,
+        },
+        secondary: {
+          main: whiteColors.secondary,
+        },
+      }
+    },
+  },
+});
+
+export default function RootLayout({ children }: Props) {
+  return (
+    <MuiThemeProvider theme={theme}>
+      <StoreProvider>
+        <CssBaseline />
+        <AuthWatcher />
+        <StyledComponentsRegistry>
+          <MainComponent children={children} />
+        </StyledComponentsRegistry>
+      </StoreProvider>
+    </MuiThemeProvider>
   );
 }
