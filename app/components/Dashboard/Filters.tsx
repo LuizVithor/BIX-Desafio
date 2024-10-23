@@ -38,8 +38,8 @@ export default function Filters() {
             if (savedFilters) {
                 const parsedFilters = JSON.parse(savedFilters);
                 if (parsedFilters.dateRange) {
-                    setStartDate(new Date(parsedFilters.dateRange[0]));
-                    setEndDate(new Date(parsedFilters.dateRange[1]));
+                    setStartDate(parsedFilters.dateRange[0] && new Date(parsedFilters.dateRange[0]));
+                    setEndDate(parsedFilters.dateRange[1] && new Date(parsedFilters.dateRange[1]));
                 }
                 if (parsedFilters.accounts) setSelectedAccounts(parsedFilters.accounts);
                 if (parsedFilters.industries) setSelectedIndustries(parsedFilters.industries);
@@ -54,7 +54,6 @@ export default function Filters() {
         dispatch(setIndustries(selectedIndustries));
 
         if (startDate && endDate) {
-            console.log([startDate, endDate])
             dispatch(setDateRange([startDate, endDate]));
         } else {
             dispatch(setDateRange([null, null]));
@@ -62,11 +61,12 @@ export default function Filters() {
 
         if (typeof window !== "undefined") {
             const filtersToSave = {
-                dateRange: [startDate ? startDate.valueOf() : null, endDate ? endDate.valueOf() : null],
+                dateRange: [startDate || null, endDate || null],
                 accounts: selectedAccounts,
                 industries: selectedIndustries,
                 states: selectedStates,
             };
+            debugger
             localStorage.setItem("filters", JSON.stringify(filtersToSave));
         }
     };
@@ -83,6 +83,8 @@ export default function Filters() {
             localStorage.removeItem("filters");
         }
     };
+
+    console.log(startDate)
 
     return (
         <Box sx={{ p: 2, px: 0 }}>

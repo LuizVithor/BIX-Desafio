@@ -140,7 +140,7 @@ export default function Charts() {
                     <YAxis />
                     <Tooltip
                         formatter={(value: number, name: string, props: any) => {
-                            const currency = "USD";
+                            const currency = "BRL";
                             return [formatCurrency(value, currency), name];
                         }}
                     />
