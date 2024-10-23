@@ -21,7 +21,7 @@ export default function Sidebar() {
 
     const handleLogout = async () => {
         await signOut(auth);
-        router.push("/auth/signin");
+        router.push("/auth/signIn");
     };
 
     const drawerContent = (
