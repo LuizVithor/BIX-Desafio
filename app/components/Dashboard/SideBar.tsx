@@ -48,7 +48,7 @@ export default function Sidebar() {
     return (
         <>
             <>
-                <AppBar position="fixed" open={open}>
+                <AppBar component="nav" position="fixed">
                     <Toolbar
                         sx={{
                             display: "flex",
